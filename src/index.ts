@@ -16,14 +16,7 @@ import {
 } from "./pageUtils";
 import { validateOgImage } from "./ogImageValidator";
 
-const rootUrls: string[] = [
-  "https://tv-stg.sbtlab.io/",
-  "https://tv-stg.sbtlab.io/inscricoes",
-  "https://tv-stg.sbtlab.io/podcasts",
-  "https://tv-stg.sbtlab.io/programacao",
-  "https://tv-stg.sbtlab.io/programas",
-  "https://tv-stg.sbtlab.io/videos",
-];
+const rootUrls: string[] = ["https://google.com"];
 
 const allLinks: Set<string> = new Set();
 const visitedLinks: Set<string> = new Set();

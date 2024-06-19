@@ -41,7 +41,7 @@ npm install
 Para executar o script de validação, utilize o seguinte comando:
 
 ```
-node dist/index.js [FLAGS]
+[yarn|npm run] dev [FLAGS]
 ```
 
 ### Flags Disponíveis
@@ -55,19 +55,19 @@ node dist/index.js [FLAGS]
 #### Validar imagens OG e capturar screenshots
 
 ```
-node dist/index.js --validate-og-images --take-screenshots
+[yarn|npm run] dev --validate-og-images --take-screenshots
 ```
 
 #### Verificar a existência de tags `<h1>` sem capturar screenshots
 
 ```
-node dist/index.js --validate-h1-tags
+[yarn|npm run] dev --validate-h1-tags
 ```
 
 #### Executar todas as validações (imagens OG, tags `<h1>` e capturar screenshots)
 
 ```
-node dist/index.js --validate-og-images --validate-h1-tags --take-screenshots
+[yarn|npm run] dev --validate-og-images --validate-h1-tags --take-screenshots
 ```
 
 ## Estrutura do Projeto
