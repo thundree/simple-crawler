@@ -47,7 +47,7 @@ Para executar o script de validação, utilize o seguinte comando:
 ### Flags Disponíveis
 
 - `--validate-og-images`: Valida as imagens OG (Open Graph) nas páginas.
-- `--validate-h1-tags`: Verifica se as páginas possuem a tag `<h1>` e registra o conteúdo de texto.
+- `--validate-heading-tags`: Verifica se as páginas possuem a tag `<h1>`, `<h2>`, `<h3>`, etc e registra o conteúdo de texto.
 - `--take-screenshots`: Captura screenshots das páginas durante a validação.
 
 ### Exemplos de Uso
@@ -58,16 +58,16 @@ Para executar o script de validação, utilize o seguinte comando:
 [yarn|npm run] dev --validate-og-images --take-screenshots
 ```
 
-#### Verificar a existência de tags `<h1>` sem capturar screenshots
+#### Verificar a existência de tags `<h1>`, `<h2>`, `<h3>`, etc sem capturar screenshots
 
 ```
-[yarn|npm run] dev --validate-h1-tags
+[yarn|npm run] dev --validate-heading-tags
 ```
 
-#### Executar todas as validações (imagens OG, tags `<h1>` e capturar screenshots)
+#### Executar todas as validações (imagens OG, tags `<h1>`, `<h2>`, `<h3>`, etc e capturar screenshots)
 
 ```
-[yarn|npm run] dev --validate-og-images --validate-h1-tags --take-screenshots
+[yarn|npm run] dev --validate-og-images --validate-heading-tags --take-screenshots
 ```
 
 ## Estrutura do Projeto

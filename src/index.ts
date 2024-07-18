@@ -12,11 +12,13 @@ import {
   acceptCookies,
   scrollPageToBottom,
   checkForErrorMessage,
-  getH1Content,
+  clickMoreLinks,
+  getHeadersContent,
+  normalizeUrl,
 } from "./pageUtils";
 import { validateOgImage } from "./ogImageValidator";
 
-const rootUrls: string[] = ["https://google.com"];
+const rootUrls: string[] = [];
 
 const allLinks: Set<string> = new Set();
 const visitedLinks: Set<string> = new Set();
@@ -27,7 +29,7 @@ const processPage = async (
   screenshotDirRoot: string,
   logBaseDir: string,
   validateOgImages: boolean,
-  validateH1Tags: boolean = false,
+  validateHeaderTags: boolean = false,
   takeScreenshots: boolean = false
 ): Promise<void> => {
   const page: Page = await browser.newPage();
@@ -55,14 +57,22 @@ const processPage = async (
     });
   }
 
-  if (validateH1Tags) {
-    const h1Content = await getH1Content(page);
+  if (validateHeaderTags) {
+    const headersContent = await getHeadersContent(page);
+    let logMessage: string[] = [];
 
-    const logMessage = h1Content ?? "(H1 não encontrado)";
+    Object.keys(headersContent).forEach((header, index) => {
+      logMessage.push(
+        headersContent?.[header]
+          ? `"${header}" Encontrado`
+          : `"${header}" Não encontrado`
+      );
+    });
+
     logResult(
       `${logBaseDir}/tags`,
-      h1Content ? "success.txt" : "error.txt",
-      `${url} - ${logMessage}`
+      "headings.txt",
+      `${url} - ${logMessage.join(", ")}`
     );
   }
 
@@ -74,6 +84,9 @@ const processPage = async (
 
     logResult(`${logBaseDir}/og_images`, ogLogFile, logMessage);
   }
+
+  // Clicar no botão "ver mais" até que desapareça
+  await clickMoreLinks(page, 'a[href*="/feed-page-"] button');
 
   const isError = await checkForErrorMessage(page);
 
@@ -125,7 +138,7 @@ const processPage = async (
 
 const main = async (
   validateOgImages: boolean = false,
-  validateH1Tags: boolean = false,
+  validateHeaderTags: boolean = false,
   takeScreenshots: boolean = false
 ): Promise<void> => {
   const browser: Browser = await puppeteer.launch({ headless: true });
@@ -150,24 +163,25 @@ const main = async (
   console.log(`Início da execução às ${sessionTimestamp}`);
 
   for (const url of rootUrls) {
-    visitedLinks.add(url);
+    const normalizedUrl = normalizeUrl(url);
+    visitedLinks.add(normalizedUrl);
     try {
       await processPage(
         browser,
-        url,
+        normalizedUrl,
         screenshotDirRoot,
         logBaseDir,
         validateOgImages,
-        validateH1Tags,
+        validateHeaderTags,
         takeScreenshots
       );
     } catch (error) {
       logResult(
         logBaseDir,
         "error.txt",
-        `${url} (${(error as Error).message})`
+        `${normalizedUrl} (${(error as Error).message})`
       );
-      console.log(`Erro em ${url}: ${(error as Error).message}`);
+      console.log(`Erro em ${normalizedUrl}: ${(error as Error).message}`);
     }
   }
 
@@ -175,33 +189,36 @@ const main = async (
 
   while (pendingLinks.length > visitedLinks.size) {
     for (const link of pendingLinks) {
-      if (!visitedLinks.has(link)) {
+      const normalizedLink = normalizeUrl(link);
+      if (!visitedLinks.has(normalizedLink)) {
         console.log(
           `Visitando link ${visitedLinks.size + 1} de ${
             allLinks.size + 1
-          }:\n${link}\n`
+          }:\n${normalizedLink}\n`
         );
 
-        visitedLinks.add(link);
+        visitedLinks.add(normalizedLink);
 
         try {
           await processPage(
             browser,
-            link,
+            normalizedLink,
             screenshotDirRoot,
             logBaseDir,
             validateOgImages,
-            validateH1Tags,
+            validateHeaderTags,
             takeScreenshots
           );
         } catch (linkError) {
           logResult(
             logBaseDir,
             "error.txt",
-            `${link} - ${(linkError as Error).message}`
+            `${normalizedLink} - ${(linkError as Error).message}`
           );
           console.log(
-            `Link inacessível: ${link} - ${(linkError as Error).message}`
+            `Link inacessível: ${normalizedLink} - ${
+              (linkError as Error).message
+            }`
           );
         }
       }
@@ -215,10 +232,10 @@ const main = async (
 
 const args = process.argv.slice(2);
 const validateOgImages = args.includes("--validate-og-images");
-const validateH1Tags = args.includes("--validate-h1-tags");
+const validateHeaderTags = args.includes("--validate-heading-tags");
 const takeScreenshots = args.includes("--take-screenshots");
 
-main(validateOgImages, validateH1Tags, takeScreenshots)
+main(validateOgImages, validateHeaderTags, takeScreenshots)
   .catch((error) => {
     const errorLogDir = path.resolve(__dirname, "../logs/error");
     mkdirRecursive(errorLogDir);
